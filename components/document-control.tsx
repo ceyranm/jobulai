@@ -167,56 +167,38 @@ export default function DocumentControl({
               <button
                 onClick={handleApprove}
                 disabled={loading || isApproved}
-                className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-2 ${
+                className={`flex-1 min-w-0 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-1.5 overflow-hidden ${
                   isApproved
                     ? 'bg-green-500 text-white cursor-default'
                     : 'bg-green-50 text-green-700 hover:bg-green-100 active:bg-green-200 border border-green-300'
                 }`}
                 title={isApproved ? 'Onaylandı' : 'Onayla'}
               >
-                {isApproved ? (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Onaylandı</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Onayla</span>
-                  </>
-                )}
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="truncate text-xs sm:text-sm">
+                  {isApproved ? 'Onaylandı' : 'Onayla'}
+                </span>
               </button>
 
               {/* Reddet Butonu */}
               <button
                 onClick={handleReject}
                 disabled={loading || isRejected}
-                className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-2 ${
+                className={`flex-1 min-w-0 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-1.5 overflow-hidden ${
                   isRejected
                     ? 'bg-red-500 text-white cursor-default'
                     : 'bg-red-50 text-red-700 hover:bg-red-100 active:bg-red-200 border border-red-300'
                 }`}
                 title={isRejected ? 'Reddedildi' : 'Reddet'}
               >
-                {isRejected ? (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    <span>Reddedildi</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    <span>Reddet</span>
-                  </>
-                )}
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span className="truncate text-xs sm:text-sm">
+                  {isRejected ? 'Reddedildi' : 'Reddet'}
+                </span>
               </button>
             </div>
           )}
