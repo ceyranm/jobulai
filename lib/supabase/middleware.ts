@@ -30,7 +30,13 @@ export function createClient(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: Parameters<typeof response.cookies.set>[2];
+          }[]
+        ) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });

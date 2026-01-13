@@ -25,6 +25,7 @@ interface Document {
   file_path: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   profile_id: string;
+  mime_type: string | null;
 }
 
 interface CandidateInfo {

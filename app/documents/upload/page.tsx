@@ -6,12 +6,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
-export default function UploadDocumentPage() {
+function UploadDocumentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -468,5 +468,19 @@ export default function UploadDocumentPage() {
         </form>
       </main>
     </div>
+  );
+}
+
+export default function UploadDocumentPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      }
+    >
+      <UploadDocumentPageContent />
+    </Suspense>
   );
 }
