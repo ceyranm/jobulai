@@ -10,6 +10,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import ModernHeader from '@/components/modern-header';
 
 function UploadDocumentPageContent() {
   const router = useRouter();
@@ -303,19 +304,14 @@ function UploadDocumentPageContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link 
-              href={candidateIdFromUrl ? `/dashboard/middleman/candidates/${candidateIdFromUrl}` : '/profile'} 
-              className="text-blue-600 hover:text-blue-700"
-            >
-              ← {candidateIdFromUrl ? 'Aday Detayına Dön' : "Profilim'e Dön"}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title={isReplace ? "Belge Değiştir" : "Belge Yükle"}
+        subtitle={getDocumentTypeLabel()}
+        backLink={{
+          href: candidateIdFromUrl ? `/dashboard/middleman/candidates/${candidateIdFromUrl}` : '/profile',
+          label: candidateIdFromUrl ? 'Aday Detayına Dön' : "Profilim'e Dön"
+        }}
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">

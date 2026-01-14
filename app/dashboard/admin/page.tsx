@@ -6,7 +6,8 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import LogoutButton from '@/components/logout-button';
+import Link from 'next/link';
+import ModernHeader from '@/components/modern-header';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -46,19 +47,10 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Jobul<span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI</span>
-              </h1>
-              <p className="text-sm text-gray-600">Admin Dashboard</p>
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Admin Dashboard"
+        subtitle="Sistem Yönetimi"
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
@@ -138,10 +130,13 @@ export default async function AdminDashboardPage() {
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <h3 className="text-xl font-bold text-gray-900 mb-6">Yönetim İşlemleri</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+            <Link
+              href="/dashboard/admin/users"
+              className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+            >
               <h4 className="font-semibold text-gray-900 mb-2">👥 Kullanıcı Yönetimi</h4>
               <p className="text-sm text-gray-600">Tüm kullanıcıları görüntüle ve yönet</p>
-            </button>
+            </Link>
 
             <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
               <h4 className="font-semibold text-gray-900 mb-2">⚙️ Sistem Ayarları</h4>

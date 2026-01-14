@@ -7,7 +7,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import LogoutButton from '@/components/logout-button';
+import ModernHeader from '@/components/modern-header';
 
 export default async function CandidateDashboardPage() {
   const supabase = await createClient();
@@ -96,28 +96,11 @@ export default async function CandidateDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Jobul<span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI</span>
-              </h1>
-              <p className="text-sm text-gray-600">Ana Sayfa</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/profile"
-                className="text-gray-700 hover:text-gray-900 font-medium"
-              >
-                Profilim
-              </Link>
-              <LogoutButton />
-            </div>
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Ana Sayfa"
+        subtitle="Aday Paneli"
+        showProfileLink={true}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

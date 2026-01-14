@@ -7,7 +7,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import LogoutButton from '@/components/logout-button';
+import ModernHeader from '@/components/modern-header';
 import DocumentDownloadButton from '@/components/document-download-button';
 
 export default async function DocumentsPage() {
@@ -68,19 +68,14 @@ export default async function DocumentsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/dashboard/candidate" className="text-blue-600 hover:text-blue-700">
-                ← Dashboard'a Dön
-              </Link>
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Belgelerim"
+        subtitle="Belge Yönetimi"
+        backLink={{
+          href: '/dashboard/candidate',
+          label: "Dashboard'a Dön"
+        }}
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">

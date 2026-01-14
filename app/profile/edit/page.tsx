@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import ModernHeader from '@/components/modern-header';
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -195,16 +196,14 @@ export default function EditProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/profile" className="text-blue-600 hover:text-blue-700">
-              ← Profil'e Dön
-            </Link>
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Profil Düzenle"
+        subtitle="Profil Bilgilerini Güncelle"
+        backLink={{
+          href: '/profile',
+          label: "Profil'e Dön"
+        }}
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Profil Bilgilerimi Düzenle</h1>

@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import ModernHeader from '@/components/modern-header';
 
 export default function EditCandidatePage() {
   const router = useRouter();
@@ -241,19 +242,14 @@ export default function EditCandidatePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link 
-              href={`/dashboard/middleman/candidates/${candidateId}`}
-              className="text-blue-600 hover:text-blue-700"
-            >
-              ← Aday Detayına Dön
-            </Link>
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Aday Düzenle"
+        subtitle="Aday Bilgilerini Güncelle"
+        backLink={{
+          href: `/dashboard/middleman/candidates/${candidateId}`,
+          label: 'Aday Detayına Dön'
+        }}
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Aday Bilgilerini Düzenle</h1>

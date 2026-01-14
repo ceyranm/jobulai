@@ -42,8 +42,39 @@ function LoginPageContent() {
       }
 
       if (data.user) {
+        // Kullanıcının rolünü al
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        // Rolüne göre yönlendir
+        let targetRoute = redirect;
+        if (profile?.role) {
+          switch (profile.role) {
+            case 'ADMIN':
+              targetRoute = '/dashboard/admin';
+              break;
+            case 'CONSULTANT':
+              targetRoute = '/dashboard/consultant';
+              break;
+            case 'MIDDLEMAN':
+              targetRoute = '/dashboard/middleman';
+              break;
+            case 'CANDIDATE':
+              targetRoute = '/dashboard/candidate';
+              break;
+            default:
+              targetRoute = redirect;
+          }
+        } else {
+          // Profil yoksa, register success sayfasına gönder
+          targetRoute = '/auth/register/success';
+        }
+
         // Başarılı! Yönlendir
-        router.push(redirect);
+        router.push(targetRoute);
         router.refresh(); // Sayfayı yenile
       }
     } catch (err: any) {

@@ -1,51 +1,50 @@
-# "Invalid Refresh Token" Hatası Çözümü
+# Invalid Refresh Token Hatası Çözümü
 
-Bu hata, Supabase session cookie'lerinin (refresh token) geçersiz veya süresi dolmuş olduğunu gösterir.
+Bu hata genellikle tarayıcıda eski/geçersiz refresh token olduğunda oluşur.
 
 ## Hızlı Çözüm (Önerilen)
 
-**Tarayıcı Cookie'lerini Temizleyin ve Yeniden Giriş Yapın:**
+### Adım 1: Tarayıcı Cookie'lerini Temizle
 
-1. **Chrome/Edge:**
-   - `F12` tuşuna basın (Developer Tools)
-   - **Application** sekmesine gidin
-   - Sol menüden **Cookies** > `http://localhost:3000` seçin
-   - Tüm cookie'leri silin (sağ tık > Clear)
-   - Sayfayı yenileyin (`F5` veya `Ctrl+R`)
+**Chrome/Edge:**
+1. `F12` (Developer Tools aç)
+2. **Application** sekmesi
+3. Sol menüden **Cookies** → `http://localhost:3000` (veya domain'in)
+4. Tüm cookie'leri sil (veya sadece `sb-*` ile başlayanları)
+5. Sayfayı yenile (`F5`)
 
-2. **Firefox:**
-   - `F12` tuşuna basın (Developer Tools)
-   - **Storage** sekmesine gidin
-   - **Cookies** > `http://localhost:3000` seçin
-   - Tüm cookie'leri silin
-   - Sayfayı yenileyin
+**Alternatif:**
+- `Ctrl+Shift+Delete` → Cookies → Clear
 
-3. **Yeniden Giriş Yapın:**
-   - `/auth/login` sayfasına gidin
-   - Email ve şifrenizle giriş yapın
+### Adım 2: LocalStorage Temizle (Gerekirse)
 
-## Alternatif Çözüm
+1. Developer Tools → **Application** → **Local Storage**
+2. `http://localhost:3000` → **Clear All**
+3. Sayfayı yenile
 
-Eğer cookie temizleme işe yaramazsa:
+### Adım 3: Giriş Yap
 
-1. **Development Server'ı Yeniden Başlatın:**
-   ```bash
-   # Terminal'de Ctrl+C ile durdurun
-   npm run dev
-   ```
+1. Sayfayı yenile
+2. `/auth/login` sayfasına git
+3. Yeniden giriş yap
 
-2. **Tarayıcıyı Kapatıp Açın:**
-   - Tüm tarayıcı pencerelerini kapatın
-   - Tarayıcıyı yeniden açın
-   - `http://localhost:3000` adresine gidin
+✅ **Sorun çözülmüş olmalı!**
 
-## Neden Olur?
+---
 
-- Development ortamında cookie'lerin expire olması
-- Server'ın yeniden başlatılması sırasında session'ın kaybolması
-- Cookie'lerin bozulması veya geçersiz hale gelmesi
-- Tarayıcı cache'inin eski session bilgilerini tutması
+## Kalıcı Çözüm (Kod)
 
-## Not
+Eğer bu hata sık tekrarlıyorsa, middleware ve client'ta daha iyi hata yönetimi eklenmiş durumda.
 
-Bu hata genellikle development ortamında görülür ve normaldir. Production ortamında bu sorun daha az görülür çünkü cookie'ler daha uzun süre geçerli kalır.
+## Neden Oluşur?
+
+1. **Süresi dolmuş token**: Refresh token 30 gün sonra expire olur
+2. **Tarayıcı cookie'leri**: Eski/geçersiz cookie'ler
+3. **Supabase ayarları**: Auth settings'de token expiry değişmiş olabilir
+4. **Çoklu oturum**: Başka bir cihazdan logout yapılmış olabilir
+
+## Önleme
+
+- Düzenli olarak logout/login yap
+- Cookie'leri periyodik temizle
+- Production'da token expiry ayarlarını kontrol et

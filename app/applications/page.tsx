@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import LogoutButton from '@/components/logout-button';
+import ModernHeader from '@/components/modern-header';
 import DocumentControl from '@/components/document-control';
 import ApplicationDecision from '@/components/application-decision';
 
@@ -224,27 +224,14 @@ export default function ApplicationsManagementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button className="text-gray-600 hover:text-gray-900">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <Link href={`/dashboard/consultant`} className="text-blue-600 hover:text-blue-700">
-                ← Dashboard'a Dön
-              </Link>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-900 font-semibold">Jobull</span>
-              <LogoutButton />
-            </div>
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Başvuru Yönetimi"
+        subtitle="Aday Başvuruları"
+        backLink={{
+          href: '/dashboard/consultant',
+          label: "Dashboard'a Dön"
+        }}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Title and Filter Tabs */}

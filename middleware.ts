@@ -30,7 +30,20 @@ export async function middleware(request: NextRequest) {
     // Kullanıcının giriş yapıp yapmadığını kontrol et
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
+
+    // Refresh token hatası varsa, cookie'leri temizle ve login'e yönlendir
+    if (authError && authError.message?.includes('Refresh Token')) {
+      // Cookie'leri temizle
+      response.cookies.delete('sb-access-token');
+      response.cookies.delete('sb-refresh-token');
+      
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/auth/login';
+      redirectUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
 
     // Giriş yapmamışsa login sayfasına yönlendir
     if (!user) {

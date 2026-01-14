@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import ModernHeader from '@/components/modern-header';
 
 export default function NewCandidatePage() {
   const router = useRouter();
@@ -99,19 +100,14 @@ export default function NewCandidatePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/dashboard/middleman"
-              className="text-blue-600 hover:text-blue-700"
-            >
-              ← Dashboard'a Dön
-            </Link>
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Yeni Aday Ekle"
+        subtitle="Aday Kaydı Oluştur"
+        backLink={{
+          href: '/dashboard/middleman',
+          label: "Dashboard'a Dön"
+        }}
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Yeni Aday Ekle</h1>

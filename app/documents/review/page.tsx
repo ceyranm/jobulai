@@ -7,7 +7,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import LogoutButton from '@/components/logout-button';
+import ModernHeader from '@/components/modern-header';
 import DocumentReviewActions from '@/components/document-review-actions';
 import DocumentViewer from '@/components/document-viewer';
 
@@ -89,19 +89,14 @@ export default async function DocumentReviewPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href={`/dashboard/${profile.role.toLowerCase()}`} className="text-blue-600 hover:text-blue-700">
-                ← Dashboard'a Dön
-              </Link>
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Belge İnceleme"
+        subtitle="Belge Onay/Red İşlemleri"
+        backLink={{
+          href: `/dashboard/${profile.role.toLowerCase()}`,
+          label: "Dashboard'a Dön"
+        }}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Belge İnceleme</h1>

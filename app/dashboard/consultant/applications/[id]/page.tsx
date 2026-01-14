@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import LogoutButton from '@/components/logout-button';
+import ModernHeader from '@/components/modern-header';
 import DocumentControl from '@/components/document-control';
 import ApplicationDecisionNew from '@/components/application-decision-new';
 import DeleteApplicationButton from '@/components/delete-application-button';
@@ -256,20 +256,14 @@ export default function ApplicationDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/dashboard/consultant"
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-            >
-              ← Dashboard'a Dön
-            </Link>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <ModernHeader 
+        title="Başvuru Detayı"
+        subtitle="Aday Başvuru İnceleme"
+        backLink={{
+          href: '/dashboard/consultant',
+          label: "Dashboard'a Dön"
+        }}
+      />
 
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Üst Bölüm: Başlık, Statü, Karar Butonları ve Sil Butonu */}
