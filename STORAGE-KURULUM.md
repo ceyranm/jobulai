@@ -1,145 +1,113 @@
 # 📦 Supabase Storage Kurulum Rehberi
 
-Bu rehber, belge yükleme sistemi için Supabase Storage bucket'ını nasıl oluşturacağınızı gösterir.
+Logo yükleme özelliğinin çalışması için Supabase Storage bucket'ının oluşturulması gerekiyor.
 
----
+## 🚀 Adım 1: Storage Bucket Oluşturma
 
-## 🎯 ADIM 1: Storage Bucket'ını Oluşturma
+1. **Supabase Dashboard'a gidin**: [https://app.supabase.com](https://app.supabase.com)
+2. Projenizi seçin
+3. Sol menüden **"Storage"** sekmesine tıklayın
+4. **"New bucket"** butonuna tıklayın
+5. Şu bilgileri girin:
+   - **Name**: `public` (tam olarak bu isim olmalı)
+   - **Public bucket**: ✅ **Evet** (önemli!)
+   - **File size limit**: 5 MB (veya istediğiniz limit)
+   - **Allowed MIME types**: `image/*` (veya boş bırakın)
+6. **"Create bucket"** butonuna tıklayın
 
-### Yöntem 1: Dashboard Üzerinden (ÖNERİLEN)
+## 🔐 Adım 2: RLS (Row Level Security) Politikaları
 
-1. **Supabase Dashboard** → **Storage** sekmesine gidin
-2. **"New bucket"** butonuna tıklayın
-3. Bucket bilgilerini doldurun:
-   - **Name**: `documents`
-   - **Public bucket**: ❌ **KAPALI** (güvenlik için)
-   - **File size limit**: `50` MB (veya istediğiniz limit)
-   - **Allowed MIME types**: (isteğe bağlı) `application/pdf,image/*,.doc,.docx`
-4. **"Create bucket"** butonuna tıklayın
-
-### Yöntem 2: SQL ile
-
-Eğer SQL ile yapmak isterseniz, `supabase-storage-setup.sql` dosyasını kullanabilirsiniz.
-
-**⚠️ NOT:** SQL ile bucket oluşturmak için Service Role Key gerekebilir.
-
----
-
-## 🔐 ADIM 2: RLS Politikalarını Ekleme
+Storage bucket'ı oluşturduktan sonra RLS politikalarını ayarlamanız gerekiyor.
 
 ### 2.1. SQL Editor'e Gidin
 
-1. Supabase Dashboard → **SQL Editor**
-2. **New Query** butonuna tıklayın
+1. Sol menüden **"SQL Editor"** sekmesine tıklayın
+2. **"New Query"** butonuna tıklayın
 
-### 2.2. RLS Politikalarını Ekleyin
-
-**⚠️ ÖNEMLİ:** `storage-rls-policies-only.sql` dosyasını kullanın! (Sadece RLS politikaları içerir)
-
-1. `storage-rls-policies-only.sql` dosyasını açın
-2. **Tüm içeriği kopyalayın**
-3. SQL Editor'e **yapıştırın**
-4. **"Run"** butonuna tıklayın
-
-**✅ Başarılı mesajını görmelisiniz:**
+### 2.2. Aşağıdaki SQL'i Çalıştırın
 
 ```sql
--- Kullanıcılar kendi belgelerini yükleyebilir
-CREATE POLICY "Kullanıcılar kendi belgelerini yükleyebilir"
+-- Public bucket için okuma izni (herkes okuyabilir)
+CREATE POLICY "Public logos are viewable by everyone"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'public');
+
+-- Sadece admin'ler yükleyebilir
+CREATE POLICY "Only admins can upload logos"
 ON storage.objects FOR INSERT
 WITH CHECK (
-  bucket_id = 'documents' AND
-  (storage.foldername(name))[1] = auth.uid()::text
+  bucket_id = 'public' AND
+  EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() 
+    AND role = 'ADMIN'
+  )
 );
 
--- Kullanıcılar kendi belgelerini görebilir
-CREATE POLICY "Kullanıcılar kendi belgelerini görebilir"
-ON storage.objects FOR SELECT
+-- Sadece admin'ler güncelleyebilir
+CREATE POLICY "Only admins can update logos"
+ON storage.objects FOR UPDATE
 USING (
-  bucket_id = 'documents' AND
-  (storage.foldername(name))[1] = auth.uid()::text
+  bucket_id = 'public' AND
+  EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() 
+    AND role = 'ADMIN'
+  )
 );
 
--- Kullanıcılar kendi belgelerini silebilir
-CREATE POLICY "Kullanıcılar kendi belgelerini silebilir"
+-- Sadece admin'ler silebilir
+CREATE POLICY "Only admins can delete logos"
 ON storage.objects FOR DELETE
 USING (
-  bucket_id = 'documents' AND
-  (storage.foldername(name))[1] = auth.uid()::text
-);
-
--- Consultant ve Admin tüm belgeleri görebilir
-CREATE POLICY "Consultant ve Admin belgeleri görebilir"
-ON storage.objects FOR SELECT
-USING (
-  bucket_id = 'documents' AND
+  bucket_id = 'public' AND
   EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid()
-    AND role IN ('CONSULTANT', 'ADMIN')
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() 
+    AND role = 'ADMIN'
   )
 );
 ```
 
----
+### 2.3. SQL'i Çalıştırın
 
-## ✅ ADIM 3: Test Etme
+1. SQL kodunu yapıştırın
+2. **"Run"** butonuna tıklayın (veya `Ctrl + Enter`)
+3. ✅ **"Success"** mesajını görmelisiniz
 
-1. **Next.js uygulamanızda** `/documents/upload` sayfasına gidin
-2. Bir belge seçin ve yükleyin
-3. **Supabase Dashboard** → **Storage** → **documents** bucket'ına gidin
-4. Yüklenen dosyayı görmelisiniz ✅
+## ✅ Adım 3: Test Etme
 
----
+1. Admin olarak giriş yapın
+2. Dashboard → Sistem Ayarları'na gidin
+3. Bir logo dosyası seçin
+4. "Ayarları Kaydet" butonuna tıklayın
 
-## 📁 Dosya Yapısı
-
-Storage'da dosyalar şu yapıda saklanır:
-```
-documents/
-  └── {user-id}/
-      └── {timestamp}.{extension}
-```
-
-**Örnek:**
-```
-documents/
-  └── 123e4567-e89b-12d3-a456-426614174000/
-      └── 1701234567890.pdf
-```
-
----
-
-## 🔒 Güvenlik Notları
-
-- ✅ Bucket **private** olmalı (public değil)
-- ✅ Her kullanıcı sadece kendi klasörüne yazabilir
-- ✅ Consultant ve Admin tüm dosyaları görebilir
-- ✅ Dosya boyutu limiti ayarlanmalı (50MB önerilir)
-
----
+Eğer hala hata alıyorsanız, tarayıcının Developer Console'unu açın (F12) ve hata mesajını kontrol edin.
 
 ## 🐛 Sorun Giderme
 
 ### "Bucket not found" hatası
-- ✅ Bucket'ın adının `documents` olduğundan emin olun
-- ✅ RLS politikalarını kontrol edin
+- ✅ Storage'da `public` adında bir bucket oluşturduğunuzdan emin olun
+- ✅ Bucket adının tam olarak `public` olduğunu kontrol edin (büyük/küçük harf duyarlı)
 
-### "Access denied" hatası
-- ✅ RLS politikalarının doğru çalıştığından emin olun
-- ✅ Kullanıcının giriş yaptığından emin olun
+### "new row violates row-level security" hatası
+- ✅ RLS politikalarını yukarıdaki SQL ile oluşturduğunuzdan emin olun
+- ✅ Admin olarak giriş yaptığınızdan emin olun
 
-### Dosya yüklenmiyor
-- ✅ Dosya boyutu limitini kontrol edin
-- ✅ MIME type kontrolü yapılıyorsa, izin verilen tipleri kontrol edin
+### "Unauthorized" hatası
+- ✅ Admin rolünde bir kullanıcı ile giriş yaptığınızdan emin olun
+- ✅ Profil tablosunda rolünüzün `ADMIN` olduğunu kontrol edin
 
----
+### Logo görünmüyor
+- ✅ Bucket'ın **Public** olarak işaretlendiğinden emin olun
+- ✅ Logo URL'sinin doğru olduğunu kontrol edin
+- ✅ Tarayıcı konsolunda (F12) hata mesajlarını kontrol edin
 
-## 📚 Sonraki Adımlar
+## 📝 Notlar
 
-Bucket oluşturulduktan sonra:
-1. ✅ Belge yükleme sayfası çalışacak (`/documents/upload`)
-2. ✅ Belgeler Storage'da saklanacak
-3. ✅ Documents tablosuna kayıt eklenecek
+- Logo dosyaları `logos/` klasöründe saklanır
+- Maksimum dosya boyutu: 5MB
+- Desteklenen formatlar: PNG, JPG, SVG, GIF, WebP
+- Logo URL'si otomatik olarak public URL olarak oluşturulur
 
 Sorularınız varsa sorun! 😊

@@ -1,0 +1,28 @@
+# PHP
+*.log
+*.cache
+
+# Environment
+.env
+.env.local
+
+# Uploads (kullanıcı yüklemeleri)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Composer (eğer kullanılıyorsa)
+/vendor/
+
+# Node modules (eğer kullanılıyorsa)
+node_modules/

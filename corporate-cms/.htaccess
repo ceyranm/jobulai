@@ -1,0 +1,28 @@
+# Apache Yapılandırması - Corporate CMS
+
+# PHP ayarları
+<IfModule mod_php8.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+</IfModule>
+
+# URL Rewriting
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /corporate-cms/
+    
+    # setup.php'ye erişime izin ver
+    RewriteCond %{REQUEST_URI} ^/corporate-cms/setup\.php$ [NC]
+    RewriteRule ^ - [L]
+    
+    # public klasörüne yönlendirme
+    RewriteCond %{REQUEST_URI} ^/corporate-cms/$ [NC]
+    RewriteRule ^(.*)$ public/index.php [L]
+    
+    # public klasörüne erişim
+    RewriteCond %{REQUEST_URI} ^/corporate-cms/public/(.*)$ [NC]
+    RewriteRule ^public/(.*)$ public/$1 [L]
+</IfModule>
+
+# Dizin listelemesini kapat
+Options -Indexes

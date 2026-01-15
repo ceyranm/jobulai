@@ -31,11 +31,6 @@ export async function submitApplicationForEvaluation(profileId: string) {
       return { error: 'Sadece adaylar başvuru gönderebilir' };
     }
 
-    // Başvuru statüsü kontrolü - sadece NEW_APPLICATION veya UPDATE_REQUIRED statüsünden EVALUATION'a geçilebilir
-    if (profile.application_status !== 'NEW_APPLICATION' && profile.application_status !== 'UPDATE_REQUIRED') {
-      return { error: 'Bu başvuru değerlendirmeye gönderilemez' };
-    }
-
     // Bilgilerin tamamlanıp tamamlanmadığını kontrol et
     const { data: candidateInfo } = await supabase
       .from('candidate_info')
@@ -62,35 +57,104 @@ export async function submitApplicationForEvaluation(profileId: string) {
       }
     }
 
-    // Tüm belgelerin yüklenip yüklenmediğini kontrol et
+    // Belgeleri al
     const { data: documents } = await supabase
       .from('documents')
       .select('*')
       .eq('profile_id', profileId);
 
-    const requiredDocumentTypes = ['KIMLIK', 'RESIDENCE', 'POLICE', 'CV'];
-    const uploadedDocumentTypes = documents?.map((doc) => doc.document_type) || [];
+    if (!documents || documents.length === 0) {
+      return { error: 'Lütfen en az bir belge yükleyin' };
+    }
 
-    for (const docType of requiredDocumentTypes) {
-      if (!uploadedDocumentTypes.includes(docType)) {
-        return { error: `Lütfen ${docType === 'KIMLIK' ? 'Kimlik Belgesi' : docType === 'RESIDENCE' ? 'İkametgah' : docType === 'POLICE' ? 'Sabıka Kaydı' : 'CV'} belgesini yükleyin` };
+    // PENDING durumundaki belgeleri EVALUATION'a geçir
+    const pendingDocuments = documents.filter(doc => doc.status === 'PENDING');
+    if (pendingDocuments.length > 0) {
+      const { error: documentsUpdateError } = await supabase
+        .from('documents')
+        .update({
+          status: 'EVALUATION',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('profile_id', profileId)
+        .eq('status', 'PENDING');
+
+      if (documentsUpdateError) {
+        return { error: documentsUpdateError.message || 'Belgeler güncellenirken hata oluştu' };
       }
     }
 
-    // Başvuru statüsünü EVALUATION'a güncelle
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        application_status: 'EVALUATION',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', profileId);
+    // Başvuru statüsünü EVALUATION'a güncelle (sadece NEW_APPLICATION veya UPDATE_REQUIRED ise)
+    if (profile.application_status === 'NEW_APPLICATION' || profile.application_status === 'UPDATE_REQUIRED') {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          application_status: 'EVALUATION',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', profileId);
 
-    if (updateError) {
-      return { error: updateError.message || 'Başvuru gönderilirken hata oluştu' };
+      if (updateError) {
+        return { error: updateError.message || 'Başvuru gönderilirken hata oluştu' };
+      }
     }
 
     revalidatePath('/profile');
+    revalidatePath('/dashboard/candidate');
+
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || 'Bir hata oluştu' };
+  }
+}
+
+export async function submitSingleDocumentForEvaluation(documentId: string) {
+  const supabase = await createClient();
+
+  try {
+    // Kullanıcı kontrolü
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: 'Giriş yapmamışsınız' };
+    }
+
+    // Belgeyi al
+    const { data: document, error: docError } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('id', documentId)
+      .single();
+
+    if (docError || !document) {
+      return { error: 'Belge bulunamadı' };
+    }
+
+    // Kullanıcının kendi belgesi olduğunu kontrol et
+    if (document.profile_id !== user.id) {
+      return { error: 'Bu belge size ait değil' };
+    }
+
+    // Belge sadece PENDING durumunda olabilir
+    if (document.status !== 'PENDING') {
+      return { error: 'Sadece beklemede olan belgeler değerlendirmeye gönderilebilir' };
+    }
+
+    // Belge durumunu EVALUATION'a güncelle
+    const { error: updateError } = await supabase
+      .from('documents')
+      .update({
+        status: 'EVALUATION',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', documentId);
+
+    if (updateError) {
+      return { error: updateError.message || 'Belge güncellenirken hata oluştu' };
+    }
+
     revalidatePath('/dashboard/candidate');
 
     return { success: true };

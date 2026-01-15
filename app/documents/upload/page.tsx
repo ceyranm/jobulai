@@ -63,6 +63,16 @@ function UploadDocumentPageContent() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
+      // Dosya formatı kontrolü
+      const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+      const allowedExtensions = ['.pdf', '.png', '.jpg', '.jpeg'];
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      
+      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+        setError('Sadece PDF, PNG, JPG ve JPEG formatları kabul edilir');
+        return;
+      }
+      
       // Dosya boyutu kontrolü (50MB limit)
       if (file.size > 50 * 1024 * 1024) {
         setError('Dosya boyutu 50MB\'dan küçük olmalıdır');
@@ -385,14 +395,14 @@ function UploadDocumentPageContent() {
                         type="file"
                         className="sr-only"
                         onChange={handleFileChange}
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        accept=".pdf,.png,.jpg,.jpeg"
                         required
                       />
                     </label>
                     <p className="pl-1">veya sürükleyip bırakın</p>
                   </div>
                   <p className="text-xs text-gray-500">
-                    PDF, DOC, DOCX, JPG, PNG (Maksimum 50MB)
+                    PDF, PNG, JPG, JPEG (Maksimum 50MB)
                   </p>
                 </div>
               </div>

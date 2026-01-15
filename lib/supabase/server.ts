@@ -52,29 +52,11 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
-        // Neden getAll ve setAll kullanıyoruz?
-        // - getAll: Tüm cookie'leri oku (Supabase session birden fazla cookie'de saklanabilir)
-        // - setAll: Cookie'leri güncelle (session değiştiğinde otomatik güncellenmeli)
+        // Neden getAll kullanıyoruz?
+        // - Server Components'te sadece cookie'leri okumamız yeterli
+        // - Cookie güncellemeleri middleware tarafından yapılır
         getAll() {
           return cookieStore.getAll();
-        },
-        setAll(
-          cookiesToSet: {
-            name: string;
-            value: string;
-            options?: Parameters<typeof cookieStore.set>[2];
-          }[]
-        ) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch (error) {
-            // Neden try-catch?
-            // - Server Components'te cookie'ler async işlemlerde sorun çıkarabilir
-            // - Hata olsa bile uygulamanın çökmesini önler
-            console.error('Cookie set error:', error);
-          }
         },
       },
     }

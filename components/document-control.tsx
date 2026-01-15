@@ -33,13 +33,14 @@ export default function DocumentControl({
   // Yeni Başvuru ve Bilgi/Evrak Güncelleme statüsündeyse belgeler işaretlenemez
   const canReview = applicationStatus !== 'NEW_APPLICATION' && applicationStatus !== 'UPDATE_REQUIRED';
   const supabase = createClient();
-  const [loading, setLoading] = useState(false);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleView = async () => {
     if (!document) return;
 
-    setLoading(true);
+    setViewLoading(true);
     setError(null);
 
     try {
@@ -55,14 +56,14 @@ export default function DocumentControl({
     } catch (err: any) {
       setError(err.message || 'Belge açılamadı');
     } finally {
-      setLoading(false);
+      setViewLoading(false);
     }
   };
 
   const handleApprove = async () => {
     if (!document) return;
 
-    setLoading(true);
+    setActionLoading(true);
     setError(null);
 
     try {
@@ -86,17 +87,18 @@ export default function DocumentControl({
 
       if (updateError) throw updateError;
 
-      onUpdate();
+      setActionLoading(false);
+      await onUpdate();
     } catch (err: any) {
       setError(err.message || 'Onaylama sırasında hata oluştu');
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
   const handleReject = async () => {
     if (!document) return;
 
-    setLoading(true);
+    setActionLoading(true);
     setError(null);
 
     try {
@@ -120,10 +122,11 @@ export default function DocumentControl({
 
       if (updateError) throw updateError;
 
-      onUpdate();
+      setActionLoading(false);
+      await onUpdate();
     } catch (err: any) {
       setError(err.message || 'Reddetme sırasında hata oluştu');
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
@@ -138,10 +141,10 @@ export default function DocumentControl({
           {/* Görüntüle Butonu */}
           <button
             onClick={handleView}
-            disabled={loading}
+            disabled={viewLoading || actionLoading}
             className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-2"
           >
-            {loading ? (
+            {viewLoading ? (
               <>
                 <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -166,7 +169,7 @@ export default function DocumentControl({
               {/* Onayla Butonu */}
               <button
                 onClick={handleApprove}
-                disabled={loading || isApproved}
+                disabled={actionLoading || isApproved}
                 className={`flex-1 min-w-0 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-1.5 overflow-hidden ${
                   isApproved
                     ? 'bg-green-500 text-white cursor-default'
@@ -174,9 +177,16 @@ export default function DocumentControl({
                 }`}
                 title={isApproved ? 'Onaylandı' : 'Onayla'}
               >
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                {actionLoading && !isApproved ? (
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
                 <span className="truncate text-xs sm:text-sm">
                   {isApproved ? 'Onaylandı' : 'Onayla'}
                 </span>
@@ -185,7 +195,7 @@ export default function DocumentControl({
               {/* Reddet Butonu */}
               <button
                 onClick={handleReject}
-                disabled={loading || isRejected}
+                disabled={actionLoading || isRejected}
                 className={`flex-1 min-w-0 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-1.5 overflow-hidden ${
                   isRejected
                     ? 'bg-red-500 text-white cursor-default'
@@ -193,9 +203,16 @@ export default function DocumentControl({
                 }`}
                 title={isRejected ? 'Reddedildi' : 'Reddet'}
               >
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                {actionLoading && !isRejected ? (
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
                 <span className="truncate text-xs sm:text-sm">
                   {isRejected ? 'Reddedildi' : 'Reddet'}
                 </span>

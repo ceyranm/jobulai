@@ -1,6 +1,6 @@
 /**
  * Profil Sayfası (Profilim)
- * 
+ *
  * Kullanıcının tüm profil bilgilerini görüntüleyip yönetebileceği sayfa
  * Temel Bilgiler, Aday Bilgileri ve Belgeler bölümleri
  */
@@ -9,8 +9,14 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import ModernHeader from '@/components/modern-header';
-import DocumentRow from '@/components/document-row';
-import SubmitApplicationButton from '@/components/submit-application-button';
+import ProfileDocumentCard from '@/components/profile-document-card';
+import ChangePasswordForm from '@/components/change-password-form';
+import PhoneNumberEditor from '@/components/phone-number-editor';
+import AddressEditor from '@/components/address-editor';
+import ExperienceYearsEditor from '@/components/experience-years-editor';
+import SkillsEditor from '@/components/skills-editor';
+import AccountDeletionRequest from '@/components/account-deletion-request';
+import Footer from '@/components/footer';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -41,14 +47,14 @@ export default async function ProfilePage() {
     .eq('profile_id', user.id)
     .single();
 
-  // Belgeleri al (her zaman güncel veriyi almak için)
-  const { data: documents, error: documentsError } = await supabase
+  // Belgeleri al
+  const { data: documents } = await supabase
     .from('documents')
     .select('*')
     .eq('profile_id', user.id)
-    .order('updated_at', { ascending: false }); // En son güncellenen önce gelsin
+    .order('updated_at', { ascending: false });
 
-  // Belge türlerini tanımla (sıra önemli)
+  // Belge türlerini tanımla
   const documentTypes = [
     { type: 'KIMLIK', label: 'Kimlik Belgesi', icon: '🆔' },
     { type: 'RESIDENCE', label: 'İkametgah', icon: '🏠' },
@@ -58,8 +64,8 @@ export default async function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <ModernHeader 
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+      <ModernHeader
         title="Profilim"
         subtitle="Profil Bilgileri ve Belgeler"
         backLink={{
@@ -68,216 +74,147 @@ export default async function ProfilePage() {
         }}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Profilim</h1>
-
-        {/* Başvuru Durumu Göstergesi */}
-        {profile.role === 'CANDIDATE' && profile.application_status && (
-          <div className="mb-6 bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center justify-between">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Profil Bilgileri - Yan Yana Kartlar */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Temel Bilgiler Kartı */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Başvuru Durumu</h3>
-                <p className={`text-sm font-medium ${
-                  profile.application_status === 'NEW_APPLICATION' ? 'text-blue-600' :
-                  profile.application_status === 'EVALUATION' ? 'text-yellow-600' :
-                  profile.application_status === 'APPROVED' ? 'text-green-600' :
-                  profile.application_status === 'REJECTED' ? 'text-red-600' :
-                  'text-orange-600'
-                }`}>
-                  {profile.application_status === 'NEW_APPLICATION' ? '🆕 Yeni Başvuru' :
-                   profile.application_status === 'EVALUATION' ? '⏳ Değerlendirme Aşamasında' :
-                   profile.application_status === 'APPROVED' ? '✅ Onaylı' :
-                   profile.application_status === 'REJECTED' ? '❌ Reddedildi' :
-                   '📝 Bilgi/Evrak Güncelleme Gerekli'}
+                <h2 className="text-2xl font-bold text-gray-900">Temel Bilgiler</h2>
+                <p className="text-gray-600">Kişisel bilgileriniz</p>
+              </div>
+            </div>
+            {profile.role === 'CANDIDATE' && (profile.application_status === 'NEW_APPLICATION' || profile.application_status === 'UPDATE_REQUIRED') && (
+              <div className="mb-6">
+                <Link
+                  href="/profile/edit"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Düzenle
+                </Link>
+              </div>
+            )}
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-lg p-4 border border-gray-200">
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Ad Soyad
+                </label>
+                <p className="text-gray-900 font-medium">{profile.full_name || 'Belirtilmemiş'}</p>
+              </div>
+
+              <PhoneNumberEditor phone={candidateInfo?.phone || null} profileId={user.id} />
+
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-lg p-4 border border-gray-200">
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  TC Kimlik No
+                </label>
+                <p className="text-gray-900 font-medium">{candidateInfo?.national_id || 'Belirtilmemiş'}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-lg p-4 border border-gray-200">
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Doğum Tarihi
+                </label>
+                <p className="text-gray-900 font-medium">
+                  {candidateInfo?.date_of_birth
+                    ? new Date(candidateInfo.date_of_birth).toLocaleDateString('tr-TR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })
+                    : 'Belirtilmemiş'}
                 </p>
               </div>
-              {profile.application_status === 'EVALUATION' && (
-                <div className="text-sm text-gray-600">
-                  Başvurunuz değerlendirme aşamasında. Profil bilgileriniz bu aşamada düzenlenemez.
-                </div>
-              )}
             </div>
           </div>
-        )}
 
-        {/* Profil Bilgileri (Birleştirilmiş) */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Profil Bilgileri</h2>
-            {profile.role === 'CANDIDATE' && (profile.application_status === 'NEW_APPLICATION' || profile.application_status === 'UPDATE_REQUIRED') && (
-              <Link
-                href="/profile/edit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Düzenle
-              </Link>
-            )}
-          </div>
-
-          <div className="space-y-6">
-            {/* Temel Bilgiler */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-                Temel Bilgiler
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Aday Bilgileri Kartı (Eğer CANDIDATE ise) */}
+          {profile.role === 'CANDIDATE' && (
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ad Soyad
+                  <h2 className="text-2xl font-bold text-gray-900">Aday Bilgileri</h2>
+                  <p className="text-gray-600">İş ve eğitim bilgileriniz</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 rounded-lg p-4 border border-emerald-200">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    E-posta
                   </label>
-                  <p className="text-gray-900">{profile.full_name || 'Belirtilmemiş'}</p>
+                  <p className="text-gray-900 font-medium">{user.email || candidateInfo?.email || 'Belirtilmemiş'}</p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Telefon Numarası
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 rounded-lg p-4 border border-emerald-200">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Kayıt Tarihi
                   </label>
-                  <p className="text-gray-900">{candidateInfo?.phone || 'Belirtilmemiş'}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    TC Kimlik No
-                  </label>
-                  <p className="text-gray-900">{candidateInfo?.national_id || 'Belirtilmemiş'}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Doğum Tarihi
-                  </label>
-                  <p className="text-gray-900">
-                    {candidateInfo?.date_of_birth
-                      ? new Date(candidateInfo.date_of_birth).toLocaleDateString('tr-TR', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })
-                      : 'Belirtilmemiş'}
+                  <p className="text-gray-900 font-medium">
+                    {new Date(profile.created_at).toLocaleDateString('tr-TR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
                   </p>
                 </div>
-              </div>
-            </div>
 
-            {/* Aday Bilgileri (Eğer CANDIDATE ise) */}
-            {profile.role === 'CANDIDATE' && (
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-                  Aday Bilgileri
-                </h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        E-posta
-                      </label>
-                      <p className="text-gray-900">{user.email || candidateInfo?.email || 'Belirtilmemiş'}</p>
-                    </div>
+                <AddressEditor address={candidateInfo?.address || null} profileId={user.id} />
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Kayıt Tarihi
-                      </label>
-                      <p className="text-gray-900">
-                        {new Date(profile.created_at).toLocaleDateString('tr-TR', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Adres
-                      </label>
-                      <p className="text-gray-900">{candidateInfo?.address || 'Belirtilmemiş'}</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Eğitim Seviyesi
-                      </label>
-                      <p className="text-gray-900">{candidateInfo?.education_level || 'Belirtilmemiş'}</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Deneyim Yılı
-                      </label>
-                      <p className="text-gray-900">{candidateInfo?.experience_years || 0} yıl</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Beceriler
-                    </label>
-                    {candidateInfo?.skills && candidateInfo.skills.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {candidateInfo.skills.map((skill: string, index: number) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-900">Belirtilmemiş</p>
-                    )}
-                  </div>
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 rounded-lg p-4 border border-emerald-200">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Eğitim Seviyesi
+                  </label>
+                  <p className="text-gray-900 font-medium">{candidateInfo?.education_level || 'Belirtilmemiş'}</p>
                 </div>
+
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 rounded-lg p-4 border border-emerald-200">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Deneyim Yılı
+                  </label>
+                  <p className="text-gray-900 font-medium">{candidateInfo?.experience_years || 0} yıl</p>
+                </div>
+
+                <SkillsEditor skills={candidateInfo?.skills || []} profileId={user.id} />
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Belgeler Bölümü */}
-        <div id="documents" className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Belgelerim</h2>
-
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800">
-              <strong>Bilgi:</strong> Her belge türünden bir belge yükleyebilirsiniz. Belgeler consultant'lar tarafından incelendikten sonra onaylanacaktır.
-            </p>
-          </div>
-
-          {/* Belge Satırları */}
-          <div className="space-y-4">
-            {documentTypes.map((docType) => {
-              const document = documents?.find((doc) => doc.document_type === docType.type);
-              return (
-                <DocumentRow
-                  key={docType.type}
-                  documentType={docType.type as 'CV' | 'POLICE' | 'RESIDENCE' | 'KIMLIK' | 'DIPLOMA'}
-                  documentTypeLabel={docType.label}
-                  documentTypeIcon={docType.icon}
-                  document={document}
-                  profileId={user.id}
-                  canEdit={profile.role === 'CANDIDATE' && (profile.application_status === 'NEW_APPLICATION' || profile.application_status === 'UPDATE_REQUIRED')}
-                  applicationStatus={profile.application_status || undefined}
-                />
-              );
-            })}
-          </div>
-
-          {/* Başvurumu Değerlendirmeye Gönder Butonu */}
-          {profile.role === 'CANDIDATE' && (
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <SubmitApplicationButton
-                profileId={user.id}
-                applicationStatus={profile.application_status}
-                candidateInfo={candidateInfo}
-                documents={documents || []}
-                requiredDocumentTypes={documentTypes.map((dt) => dt.type)}
-              />
             </div>
           )}
         </div>
+
+
+        {/* Şifre Yenileme Bölümü (Tüm roller için) */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Güvenlik Ayarları</h2>
+              <p className="text-gray-600">Şifrenizi güncelleyin ve hesabınızı koruyun</p>
+            </div>
+          </div>
+          <ChangePasswordForm />
+        </div>
+
+        {/* Hesap Silme Bölümü */}
+        <AccountDeletionRequest profileId={user.id} />
       </main>
+      <Footer simple />
     </div>
   );
 }
